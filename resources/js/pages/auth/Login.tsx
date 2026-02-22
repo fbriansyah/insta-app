@@ -1,5 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useState, SubmitEvent } from 'react';
+import type { SubmitEvent } from 'react';
+import { useState } from 'react';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -39,6 +40,7 @@ export default function Login() {
                 }
             }
         } catch (err) {
+            console.error(err); // todo: do something with error
             setError('An error occurred while communicating with the server.');
         } finally {
             setIsLoading(false);
