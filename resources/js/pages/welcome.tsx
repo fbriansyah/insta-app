@@ -104,6 +104,29 @@ export default function Welcome() {
         }
     };
 
+    const handleDeleteComment = async (postId: number, commentId: number) => {
+        if (!confirm("Are you sure you want to delete this comment?")) return;
+        try {
+            const token = localStorage.getItem('auth_token');
+            await axios.delete(`/api/comments/${commentId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            setPosts(prev => prev.map(post => {
+                if (post.id === postId) {
+                    return {
+                        ...post,
+                        comments: post.comments.filter(c => c.id !== commentId),
+                        comments_count: post.comments_count - 1
+                    };
+                }
+                return post;
+            }));
+        } catch (error) {
+            console.error("Failed to delete comment", error);
+        }
+    };
+
     return (
         <Layout title="InstaApp Feed">
             {loading && page === 1 ? (
@@ -177,9 +200,20 @@ export default function Welcome() {
                                 {post.comments && post.comments.length > 0 && (
                                     <div className="mt-2 space-y-1">
                                         {post.comments.slice(-3).map(comment => (
-                                            <div key={comment.id} className="text-sm text-gray-900 dark:text-gray-100">
-                                                <span className="font-semibold mr-2">{comment.author.username}</span>
-                                                <span className="text-gray-800 dark:text-gray-200">{comment.content}</span>
+                                            <div key={comment.id} className="text-sm text-gray-900 dark:text-gray-100 flex justify-between group">
+                                                <div>
+                                                    <span className="font-semibold mr-2">{comment.author.username}</span>
+                                                    <span className="text-gray-800 dark:text-gray-200">{comment.content}</span>
+                                                </div>
+                                                {comment.can_delete && (
+                                                    <button
+                                                        onClick={() => handleDeleteComment(post.id, comment.id)}
+                                                        className="text-xs text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        title="Delete comment"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                )}
                                             </div>
                                         ))}
                                         {post.comments_count > 3 && (

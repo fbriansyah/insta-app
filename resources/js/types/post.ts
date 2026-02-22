@@ -9,6 +9,7 @@ export interface Comment {
     id: number;
     content: string;
     author: User;
+    can_delete: boolean;
     created_at: string;
 }
 
