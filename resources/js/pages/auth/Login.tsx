@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useState, FormEvent } from 'react';
+import { useState, SubmitEvent } from 'react';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -7,7 +7,7 @@ export default function Login() {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: SubmitEvent) => {
         e.preventDefault();
         setError('');
         setIsLoading(true);

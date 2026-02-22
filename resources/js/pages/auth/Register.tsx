@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useState, FormEvent } from 'react';
+import { useState, SubmitEvent } from 'react';
 
 export default function Register() {
     const [formData, setFormData] = useState({
@@ -17,7 +17,7 @@ export default function Register() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: SubmitEvent) => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
