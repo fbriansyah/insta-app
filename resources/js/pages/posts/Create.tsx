@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
 import { Head } from '@inertiajs/react';
 import axios from 'axios';
+import React, { useState } from 'react';
 
 export default function Create() {
     const [data, setData] = useState({
@@ -41,8 +41,8 @@ export default function Create() {
 
             // Redirect or show success
             window.location.href = '/'; // Or wherever feed is
-        } catch (error: any) {
-            if (error.response?.data?.errors) {
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response?.data?.errors) {
                 const apiErrors = error.response.data.errors;
                 setErrors({
                     caption: apiErrors.caption?.[0],
