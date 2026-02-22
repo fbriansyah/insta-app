@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    image: insta-app-local
+    container_name: insta_app_base
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      # Tambahkan env lain jika perlu dioverride dari .env
+    ports:
+      - "8000:80"
+    depends_on:
+      - pgsql
+      - redis
+    networks:
+      - insta_network
+
+  vite:
+    image: node:20-alpine
+    container_name: insta_app_vite
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - "5173:5173"
+    command: sh -c "npm install && npm run dev -- --host"
+    networks:
+      - insta_network
+
+  pgsql:
+    image: postgres:15-alpine
+    container_name: insta_app_pgsql
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-insta_app}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-your_password}
+    volumes:
+      - insta_pgsql_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - insta_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: insta_app_redis
+    restart: unless-stopped
+    volumes:
+      - insta_redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - insta_network
+
+networks:
+  insta_network:
+    driver: bridge
+
+volumes:
+  insta_pgsql_data:
+  insta_redis_data:
