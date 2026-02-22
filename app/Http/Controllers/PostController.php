@@ -22,7 +22,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::with('user')->latest()->paginate(10);
+        $posts = Post::with(['user', 'comments.user'])->withCount(['likes', 'comments'])->latest()->paginate(10);
         return PostResource::collection($posts);
     }
 
@@ -40,7 +40,8 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        return new PostResource($post->load('user'));
+        $post->load(['user', 'comments.user'])->loadCount(['likes', 'comments']);
+        return new PostResource($post);
     }
 
     /**

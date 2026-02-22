@@ -61,6 +61,49 @@ export default function Welcome() {
         return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(date);
     };
 
+    const handleLike = async (postId: number) => {
+        try {
+            const token = localStorage.getItem('auth_token');
+            const res = await axios.post(`/api/posts/${postId}/like`, {}, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            // Update local state
+            setPosts(prev => prev.map(post => {
+                if (post.id === postId) {
+                    return { ...post, is_liked: res.data.is_liked, likes_count: res.data.likes_count };
+                }
+                return post;
+            }));
+        } catch (error) {
+            console.error("Failed to toggle like", error);
+        }
+    };
+
+    const handleComment = async (e: React.FormEvent<HTMLFormElement>, postId: number, content: string) => {
+        e.preventDefault();
+        try {
+            const token = localStorage.getItem('auth_token');
+            const res = await axios.post(`/api/posts/${postId}/comments`, { content }, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            const newComment = res.data.comment;
+            setPosts(prev => prev.map(post => {
+                if (post.id === postId) {
+                    return {
+                        ...post,
+                        comments: [...(post.comments || []), newComment],
+                        comments_count: post.comments_count + 1
+                    };
+                }
+                return post;
+            }));
+        } catch (error) {
+            console.error("Failed to add comment", error);
+        }
+    };
+
     return (
         <Layout title="InstaApp Feed">
             {loading && page === 1 ? (
@@ -106,13 +149,17 @@ export default function Welcome() {
                                 />
                             </div>
 
-                            {/* Post Actions (Placeholder) */}
+                            {/* Post Actions */}
                             <div className="px-4 pt-3 pb-1">
-                                <div className="flex space-x-4">
-                                    <button className="text-gray-900 dark:text-white hover:text-rose-500 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div className="flex space-x-4 items-center">
+                                    <button
+                                        onClick={() => handleLike(post.id)}
+                                        className={`${post.is_liked ? 'text-rose-500' : 'text-gray-900 dark:text-white'} hover:text-rose-500 transition-colors focus:outline-hidden flex items-center gap-1`}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className={`${post.is_liked ? 'fill-current' : 'fill-none'} h-7 w-7`} viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                         </svg>
+                                        {post.likes_count > 0 && <span className="font-semibold text-sm">{post.likes_count}</span>}
                                     </button>
                                 </div>
                             </div>
@@ -125,9 +172,48 @@ export default function Welcome() {
                                         {post.caption}
                                     </div>
                                 )}
+
+                                {/* Comments Display */}
+                                {post.comments && post.comments.length > 0 && (
+                                    <div className="mt-2 space-y-1">
+                                        {post.comments.slice(-3).map(comment => (
+                                            <div key={comment.id} className="text-sm text-gray-900 dark:text-gray-100">
+                                                <span className="font-semibold mr-2">{comment.author.username}</span>
+                                                <span className="text-gray-800 dark:text-gray-200">{comment.content}</span>
+                                            </div>
+                                        ))}
+                                        {post.comments_count > 3 && (
+                                            <div className="text-sm text-gray-500 dark:text-gray-400 mt-1 cursor-pointer">
+                                                View all {post.comments_count} comments
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
                                 <div className="mt-1 text-[10px] text-gray-500 uppercase tracking-wide">
                                     {formatDate(post.created_at)}
                                 </div>
+
+                                {/* Add Comment Input */}
+                                <form
+                                    className="mt-3 flex items-center border-t border-gray-100 dark:border-[#3E3E3A] pt-3"
+                                    onSubmit={(e) => {
+                                        const input = e.currentTarget.elements.namedItem('content') as HTMLInputElement;
+                                        if (input.value.trim()) {
+                                            handleComment(e, post.id, input.value);
+                                            input.value = '';
+                                        }
+                                    }}
+                                >
+                                    <input
+                                        type="text"
+                                        name="content"
+                                        placeholder="Add a comment..."
+                                        className="flex-1 bg-transparent text-sm focus:outline-hidden dark:text-gray-100 placeholder-gray-400"
+                                        autoComplete="off"
+                                    />
+                                    <button type="submit" className="text-indigo-600 dark:text-indigo-400 font-semibold text-sm hover:text-indigo-800 disabled:opacity-50 ml-2">Add Comment</button>
+                                </form>
                             </div>
                         </article>
                     ))}

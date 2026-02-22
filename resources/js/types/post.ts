@@ -5,10 +5,21 @@ export interface User {
     avatar_url: string | null;
 }
 
+export interface Comment {
+    id: number;
+    content: string;
+    author: User;
+    created_at: string;
+}
+
 export interface Post {
     id: number;
     caption: string | null;
     media_url: string;
     author: User;
+    likes_count: number;
+    comments_count: number;
+    is_liked: boolean;
+    comments: Comment[];
     created_at: string;
 }
