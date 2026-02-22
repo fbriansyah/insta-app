@@ -28,11 +28,14 @@ class PostResource extends JsonResource
                 }),
             ],
             'likes_count' => $this->whenCounted('likes', function ($count) {
-                return $count; }, 0),
+                return $count;
+            }, 0),
             'comments_count' => $this->whenCounted('comments', function ($count) {
-                return $count; }, 0),
+                return $count;
+            }, 0),
             'comments' => CommentResource::collection($this->whenLoaded('comments')),
             'is_liked' => $request->user('sanctum') ? $this->likes()->where('user_id', $request->user('sanctum')->id)->exists() : false,
+            'can_delete' => $request->user('sanctum') ? $request->user('sanctum')->can('delete', $this->resource) : false,
             'created_at' => $this->created_at,
         ];
     }

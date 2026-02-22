@@ -127,6 +127,21 @@ export default function Welcome() {
         }
     };
 
+    const handleDeletePost = async (postId: number) => {
+        if (!confirm("Are you sure you want to delete this post?")) return;
+        try {
+            const token = localStorage.getItem('auth_token');
+            await axios.delete(`/api/posts/${postId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            // Remove post from local state
+            setPosts(prev => prev.filter(post => post.id !== postId));
+        } catch (error) {
+            console.error("Failed to delete post", error);
+        }
+    };
+
     return (
         <Layout title="InstaApp Feed">
             {loading && page === 1 ? (
@@ -149,17 +164,31 @@ export default function Welcome() {
                     {posts.map((post) => (
                         <article key={post.id} className="bg-white dark:bg-[#161615] rounded-xl border border-gray-200 dark:border-[#3E3E3A] overflow-hidden shadow-sm">
                             {/* Post Header */}
-                            <div className="flex items-center px-4 py-3">
-                                {post.author.avatar_url ? (
-                                    <img src={post.author.avatar_url} alt={post.author.username} className="h-8 w-8 rounded-full object-cover" />
-                                ) : (
-                                    <div className="h-8 w-8 rounded-full bg-linear-to-br from-indigo-400 to-rose-400 flex items-center justify-center text-white font-bold text-xs uppercase">
-                                        {post.author.username.charAt(0)}
+                            <div className="flex justify-between items-center px-4 py-3">
+                                <div className="flex items-center">
+                                    {post.author.avatar_url ? (
+                                        <img src={post.author.avatar_url} alt={post.author.username} className="h-8 w-8 rounded-full object-cover" />
+                                    ) : (
+                                        <div className="h-8 w-8 rounded-full bg-linear-to-br from-indigo-400 to-rose-400 flex items-center justify-center text-white font-bold text-xs uppercase">
+                                            {post.author.username.charAt(0)}
+                                        </div>
+                                    )}
+                                    <div className="ml-3 flex-1">
+                                        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{post.author.username}</span>
                                     </div>
-                                )}
-                                <div className="ml-3 flex-1">
-                                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{post.author.username}</span>
                                 </div>
+
+                                {post.can_delete && (
+                                    <button
+                                        onClick={() => handleDeletePost(post.id)}
+                                        className="text-gray-400 hover:text-rose-500 transition-colors"
+                                        title="Delete post"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                )}
                             </div>
 
                             {/* Post Image */}
