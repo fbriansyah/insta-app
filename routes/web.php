@@ -14,3 +14,7 @@ Route::get('/login', function () {
 Route::get('/register', function () {
     return Inertia::render('auth/Register');
 })->name('register');
+
+Route::get('/posts/create', function () {
+    return Inertia::render('posts/Create');
+})->name('posts.create');
