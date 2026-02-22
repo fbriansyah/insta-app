@@ -27,4 +27,18 @@ class CommentController extends Controller
             'comment' => new \App\Http\Resources\CommentResource($comment->load('user')),
         ], 201);
     }
+
+    /**
+     * Remove the specified comment from storage.
+     */
+    public function destroy(Request $request, \App\Models\Comment $comment)
+    {
+        if ($request->user()->cannot('delete', $comment)) {
+            abort(403, 'Unauthorized to delete this comment.');
+        }
+
+        $comment->delete();
+
+        return response()->noContent();
+    }
 }

@@ -15,5 +15,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('posts', \App\Http\Controllers\PostController::class)->except(['update']);
 
     Route::post('/posts/{post}/comments', [\App\Http\Controllers\Api\CommentController::class, 'store']);
+    Route::delete('/comments/{comment}', [\App\Http\Controllers\Api\CommentController::class, 'destroy']);
     Route::post('/posts/{post}/like', [\App\Http\Controllers\Api\LikeController::class, 'toggle']);
 });

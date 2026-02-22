@@ -25,6 +25,7 @@ class CommentResource extends JsonResource
                     return $this->user->avatar_path ? asset(\Illuminate\Support\Facades\Storage::url($this->user->avatar_path)) : null;
                 }),
             ],
+            'can_delete' => $request->user('sanctum') ? $request->user('sanctum')->can('delete', $this->resource) : false,
             'created_at' => $this->created_at,
         ];
     }
