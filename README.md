@@ -40,6 +40,7 @@ docker-compose up -d --build
    ```bash
    php artisan key:generate
    php artisan migrate
+   php artisan storage:link
    ```
 4. Jalankan development server:
    ```bash
